@@ -6,6 +6,34 @@ import matplotlib.pyplot as plt
 
 import numpy as np
 
+#given a player's age and their performance in certain categories, give a projection of their future stats
+def projectFutureStats(name, age, category, seasons):
+
+    #nba player's prime: roughly at age 27-31
+    yearsInLeague = range( len(seasons))
+
+    #if they are younger than 25, they probably haven't reached their peak yet so calculate linear regression
+    if age < 27:
+        mymodel = np.poly1d(np.polyfit(yearsInLeague, category, 1))
+
+    #otherwise, most players fit a quadratic curve if they are past their peak
+    else:
+        mymodel = np.poly1d(np.polyfit(yearsInLeague, category, 2))
+
+
+    myline = np.linspace(0, 30, len(seasons) + 5, False)
+    
+    plt.title(name+"'s projected stats for the future")
+    plt.scatter(yearsInLeague, category, c = "r")
+    plt.plot(myline, mymodel(myline), "--")
+    plt.xlim(0, len(seasons) + 5)
+    plt.ylim(0, 40)
+    plt.xticks(range(0, len(seasons) + 5, 2))
+    plt.xlabel("Number of Seasons in the League")
+    plt.ylabel("Number of Points Scored")
+    plt.show()
+
+
 def main():
     options = Options()
     options.add_argument('--headless')
@@ -93,20 +121,17 @@ def main():
             if table[i][0] == "Career":
                 endReached = True
 
-
-
             if i > 0 and endReached == False:
-                
 
                 table[i][0] = "'"+table[i][0][2:]
-                seasons.append(table[i][0])
+                seasons.append(table[i][0][0:3])
                 age.append(int(table[i][1]))
                 gamesPlayed.append(int(table[i][5]))
                 gamesStarted.append(int(table[i][6]))
                 minutesPlayed.append(int(table[i][7]))
                 fieldGoals.append(int(table[i][8]))
                 fieldGoalsAttempted.append(int(table[i][9]))
-                fieldGoalPercentage.append(float(table[i][10]))
+                fieldGoalPercentage.append(float(table[i][10]) * 100)
                 threePtrs.append(int(table[i][11]))
                 threePtrsAttempted.append(int(table[i][12]))
                 threePtrsPercentage.append(float(table[i][13]))
@@ -131,28 +156,39 @@ def main():
                 listCount += 1
 
     except:
-        print(nameCopy +"s stats aren't complete on basketballreference.com for me to make a graph")
+        print(nameCopy +"/'s stats aren't complete on basketballreference.com for me to make a graph")
         main()
         return
+   
+    
+    startSeason = seasons[0]
+    startSeason = int(startSeason[1:3])
+    if startSeason < 35:
+        startSeason += 2000
+    else:
+        startSeason += 1900
+        
     
     
+    plt.ylim(0, 50)
     plt.plot(seasons, pointsPerGame, marker = ".")
     plt.plot(seasons, assistsPerGame, marker = ".")
     plt.plot(seasons, reboundsPerGame, marker = ".")
     plt.plot(seasons, stealsPerGame, marker = ".")
     plt.plot(seasons, blocksPerGame, marker = ".")
-    plt.legend(["Points per game", "Assists per game", "Rebounds per game", "Steals per game", "Blocks per game"])
     
-    
-    plt.title(nameCopy+"'s career stats per game")
-    plt.ylabel("Points")
-    plt.xlabel("Season")
-    plt.ylim(0, 40)
-    plt.show() 
 
+    plt.legend(["Points per game", "Assists per game", "Rebounds per game", "Steals per game", "Blocks per game"])
+    plt.title(nameCopy+"'s career stats per game")
+    plt.show()
+    
+    age = age[len(age) - 1]
+
+    projectFutureStats(nameCopy, age, pointsPerGame, seasons)
+    
     again = input("Do you want to enter in another player? (type y or n): ")
     if(again == "y"):
         main()
-    
+
 
 main()
