@@ -9,6 +9,3 @@ Example of the predictive plot:
 
 ![Image](PredictivePlot.png)
 
-Example of an overall career plot:
-![Image](InputExample.png)
-![Image](ExamplePlot.png)
